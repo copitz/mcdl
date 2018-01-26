@@ -1,0 +1,37 @@
+#! /usr/bin/env node
+
+var extend = require('extend');
+var program = require('../lib/utils').getCommander();
+program
+    .option('-m, --meta [tag]', 'Meta tag to extract from section title (tag:field[:pattern] - valid fields are title, artist, username, chapter, cloudcast or tag="value")', function (val, meta) {
+        var fieldMatch = val.match(/^([^:]+):([^:]+)(?::(.+))?$/);
+        if (fieldMatch) {
+            meta.push({
+                tag: fieldMatch[1],
+                field: fieldMatch[2],
+                pattern: fieldMatch[3] || undefined
+            });
+        } else {
+            var valueMatch = val.match(/^(.+)="([^"]+)"$/);
+            if (valueMatch) {
+                meta.push({
+                    tag: valueMatch[1],
+                    value: valueMatch[2]
+                });
+            } else {
+                throw 'Invalid tag format: ' + val;
+            }
+        }
+        return meta;
+    }, [])
+    .option('-c, --cue', 'Create cue sheets instead of actually splitting the files')
+    .option('-p, --profile [profile]', 'Audio conversion profile')
+    .option('-l, --limit [limit]', 'Maximum number of cloudcasts to split', parseInt)
+    .run(function (preset) {
+        preset.split = extend(true, {}, preset.split, {
+            meta: program.meta,
+            profile: program.profile,
+            limit: program.limit
+        });
+        require('../lib/split').all(preset);
+    });

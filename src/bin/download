@@ -1,0 +1,5 @@
+#! /usr/bin/env node
+require('../lib/utils').getCommander()
+    .run(function (preset) {
+        require('../lib/download')(preset);
+    });

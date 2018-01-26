@@ -1,0 +1,57 @@
+#! /usr/bin/env node
+
+var utils = require('../lib/utils');
+var pathinfo = require('path');
+var fs = require('fs-extra');
+var program = utils.getCommander();
+program
+    .option('-i, --info', 'Print only estimated number of files and size')
+    .run(function (preset) {
+        var options = preset.m3u,
+            username = preset.username,
+            mcdl = utils.loadMcdl(preset.dir);
+
+        var size = 0,
+            all = [],
+            ProgressBar = require('progress'),
+            bar = new ProgressBar('[:bar] :percent :etas', {
+                complete: '=',
+                incomplete: ' ',
+                width: 80,
+                total: Object.keys(mcdl.cloudcasts).length,
+                clear: true
+            }),
+            m3u = function (name, entries) {
+                var file = preset.dir + '/' + name + '.m3u';
+                if (entries.length) {
+                    fs.outputFileSync(file, entries.join("\n") + "\n");
+                } else if (fs.existsSync(file)) {
+                    fs.unlinkSync(file);
+                }
+            };
+
+        utils.iterateCasts(mcdl.cloudcasts, function (iterator) {
+            var cast = iterator.current,
+                ext = pathinfo.extname(cast.details.src.path),
+                basename = pathinfo.basename(cast.details.src.path, ext),
+                fromDir = preset.dir + '/' + basename;
+
+            if (fs.existsSync(fromDir)) {
+                var entries = [];
+                fs.readdirSync(fromDir).forEach(function (file) {
+                    if (!file.match(/\.(jpg|jpeg|png)$/) && (!options || !options.exclude || !file.match(options.exclude))) {
+                        var entry = './' + basename + '/' + file;
+                        entries.push(entry);
+                        all.push(entry);
+                    }
+                });
+                m3u(basename, entries);
+            }
+
+            bar.tick(1);
+
+            iterator.next();
+        });
+
+        m3u('all', all);
+    });

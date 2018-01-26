@@ -1,0 +1,11 @@
+.user-picture {
+  $dim: 8rem;
+  width: $dim;
+  height: $dim;
+  padding: 1px;
+  border: 1px solid $gray-200;
+  overflow: hidden;
+  img {
+    max-width: 100%;
+  }
+}
