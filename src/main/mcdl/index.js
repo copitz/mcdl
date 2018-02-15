@@ -1,11 +1,13 @@
 import Presets from './presets'
 import Config from './config'
 import EventEmitter from 'events'
+import Ffmpeg from '../util/ffmpeg'
 
 export default class Mcdl {
   tasks = []
   config = new Config()
   presets = new Presets(this)
+  ffmpeg = new Ffmpeg()
 
   constructor () {
     const emitter = new EventEmitter()
@@ -15,7 +17,7 @@ export default class Mcdl {
     }
 
     this.dispatch = (topic, ...args) => {
-      emitter.emit(topic, ...args)
+      emitter.emit('dispatch', topic, ...args)
     }
 
     this.presets.load()

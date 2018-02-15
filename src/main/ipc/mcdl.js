@@ -10,7 +10,12 @@ export default function (ipc) {
   })
 
   ipc.async('mcdl.drivers.userInfo', (type, username) => Drivers.get(type).userInfo(username))
-  ipc.async('mcdl.userInfo', (presetId, ...args) => mcdl.presets.get(presetId).userInfo(...args))
+
   ipc.sync('mcdl.savePreset', (id, preset) => mcdl.presets.savePreset(id, preset))
   ipc.sync('mcdl.deletePreset', (id) => mcdl.presets.deletePreset(id))
+
+  const p = (method) => (presetId, ...args) => mcdl.presets.get(presetId)[method](...args)
+  ipc.sync('mcdl.presetLoadUser', p('loadUser'))
+  ipc.sync('mcdl.presetLoadCasts', p('loadCasts'))
+  ipc.sync('mcdl.presetLoadCastStats', p('loadCastStats'))
 }

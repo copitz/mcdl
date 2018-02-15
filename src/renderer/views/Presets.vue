@@ -7,7 +7,7 @@
         <div class="presets" columns v-else>
             <div class="preset d-flex d-flex-row" v-for="(preset, id) in presets" :key="id">
                 <div class="user-picture" :class="{error: users.hasOwnProperty(id) && !users[id]}">
-                    <img :src="users[id].pictures.large" v-if="users[id] && users[id].pictures">
+                    <img :src="users[id].picture" v-if="users[id] && users[id].picture">
                 </div>
                 <div>
                     <h4>{{preset.username}}</h4>
