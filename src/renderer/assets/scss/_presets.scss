@@ -1,76 +1,69 @@
-.presets {
+.preset {
   $padding-y: 0.5rem;
   $padding-x: 0.75rem;
   $thumb: 7.143rem;
-  .preset {
-    width: 100%;
-    margin-bottom: $spacer;
-    @extend .border;
-    border-radius: 5px;
-    overflow: hidden;
-    position: relative;
-    min-height: $thumb;
-    padding: 0 0 0 $thumb;
+
+  width: 100%;
+  margin-bottom: $spacer;
+  @extend .border;
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+  min-height: $thumb;
+  padding: 0 0 0 $thumb;
+  display: flex;
+  flex-flow: column;
+  > .preset-img {
+    width: $thumb;
+    height: $thumb;
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: $border-color;
+  }
+  h6 {
+    border-bottom: 1px solid lighten($border-color, 5);
+    margin: 0 $padding-x / 2;
+    padding: $padding-y $padding-x / 2;
+  }
+  .preset-stats {
+    margin: 0 $padding-x;
+    padding: $padding-y 0;
+    flex: 1 0 auto;
     display: flex;
-    flex-flow: column;
-    > .preset-img {
-      width: $thumb;
-      height: $thumb;
-      background-size: cover;
-      background-position: center;
+    font-size: 0.857em;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    align-items: center;
+    color: $secondary;
+    span {
+      color: $dark;
+    }
+    p {
+      margin: 0;
+    }
+  }
+  &.preset-linked {
+    h6, .preset-stats {
+      cursor: pointer;
+    }
+  }
+  .preset-toolbar {
+    @extend .bg-light;
+    @extend .border-top;
+    display: flex;
+    padding: 0 ($padding-x - 0.375);
+    .btn {
+      border-radius: 0;
+    }
+    position: relative;
+    .preset-progress {
       position: absolute;
       left: 0;
-      top: 0;
-      background-color: $border-color;
-    }
-    > .preset-details {
-      flex: 1 0 auto;
-      max-height: 100%;
-      padding: $padding-y $padding-x 0;
-      display: flex;
-      flex-flow: column;
-    }
-    .preset-description {
-      flex: 1 1 auto;
-      font-size: 0.857em;
-    }
-    h6 {
-      border-bottom: 1px solid lighten($border-color, 5);
-      margin: 0 $padding-x / 2;
-      padding: $padding-y $padding-x / 2;
-    }
-    .preset-stats {
-      margin: 0 $padding-x;
-      padding: $padding-y 0;
-      flex: 1 0 auto;
-      display: flex;
-      font-size: 0.857em;
-      flex-flow: row wrap;
-      justify-content: space-around;
-      align-items: center;
-      color: $secondary;
-      span {
-        color: $dark;
-      }
-      p {
-        margin: 0;
-      }
-    }
-    .preset-toolbar {
-      @extend .bg-light;
-      @extend .border-top;
-      display: flex;
-      padding: 0 ($padding-x - 0.375);
-      .btn {
-        border-radius: 0;
-      }
-      position: relative;
-      .preset-progress {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 100%;
-      }
+      right: 0;
+      bottom: 100%;
     }
   }
 }

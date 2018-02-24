@@ -21,6 +21,12 @@ export default new Router({
       component: require('@/views/Presets/Form').default
     },
     {
+      path: '/preset/:id',
+      name: 'preset',
+      props: true,
+      component: require('@/views/Preset').default
+    },
+    {
       path: '*',
       redirect: '/'
     }
