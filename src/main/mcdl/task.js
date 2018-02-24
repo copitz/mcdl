@@ -1,50 +1,74 @@
-import Mcdl from './index'
+import _ from 'lodash'
 
 class Progress {
-  current = 0
-  total = 0
-  started = 0
+  current = undefined
+  total = undefined
   eta = Infinity
   rate = 0
-  _task
 
   constructor (task) {
-    this._task = task
+    this.task = () => task
+    const options = task.options().progress
+    if (options.total) {
+      this.total = options.total
+    }
+    if (options.current) {
+      this.current = options.current
+    }
   }
 
   setTotal (total) {
-    this.total = total
-    if (total > this.current) {
-      this.current = total
+    if (total === this.total) {
+      return
     }
-    if (!this.started) {
-      this.started = new Date()
+    this.total = total || 0
+    if (this.current !== undefined) {
+      if (this.total > this.current || this.current > this.total) {
+        this.current = total
+      }
+      if (this.rate) {
+        this.eta = (this.total - this.current) / this.rate
+      }
     }
-    this.rate = 0
-    if (this.rate) {
-      this.eta = (this.total - this.current) / this.rate
-    }
-    this._task.dispatch('progress')
+    this.task().dispatch('progress')
   }
 
-  tick (size) {
-    if (!this.total) {
+  setCurrent (current) {
+    if (current !== this.current) {
+      this.current = 0
+      this.tick(current)
+    }
+  }
+
+  tick (size = 1) {
+    if (this.total === undefined) {
       throw new Error('Set total before tick')
     }
-    this.current += size || 0
-    const elapsed = new Date() - this.start
+    const task = this.task()
+    if (!task.started) {
+      task.started = new Date()
+    }
+    this.current = (this.current || 0) + (size || 0)
+    const elapsed = new Date() - task.started
     this.eta = (this.current && elapsed) ? elapsed * (this.total / this.current) : Infinity
     this.rate = (elapsed) ? this.current / (elapsed / 1000) : 0
-    this._task.dispatch('progress')
+    task.dispatch('progress')
+  }
+
+  _finish (dispatch = true) {
+    this.current = this.total
+    this.eta = 0
   }
 }
 
 let id = 0
 
 export default class Task {
-  constructor (mcdl, labels) {
+  constructor (mcdl, options = {}) {
     this.id = ++id
-    this.labels = labels || {}
+    _.defaults(options, {labels: {}, progress: {}})
+    this.labels = options.labels
+    this.options = () => options
     this.exitCode = null
     this.running = false
 
@@ -55,12 +79,33 @@ export default class Task {
       mcdl.dispatch('task', event, this)
     }
 
+    this.canceler = options.cancel
+
     this.done = (exitCode) => {
-      this.exitCode = exitCode || 0
+      if (this.exitCode !== null) {
+        console.warn('Task was already done', this)
+        return
+      }
+      this.canceling = false
       this.running = false
-      mcdl.tasks.splice(Mcdl.tasks.indexOf(this), 1)
+      this.exitCode = exitCode || this.exitCode || 0
+      const index = mcdl.tasks.indexOf(this)
+      if (index > -1) {
+        mcdl.tasks.splice(index, 1)
+      }
+      this.progress._finish()
       this.dispatch('done')
+      if (options.done) {
+        options.done(this)
+      }
     }
+
+    this.fail = (error, exitCode = 1) => {
+      console.error(error)
+      this.done(exitCode)
+    }
+
+    this.canceled = () => this.done(130)
 
     this.dispatch('registered')
   }
@@ -69,12 +114,23 @@ export default class Task {
     this.labels = labels
   }
 
-  start () {
+  start (runner = this.options().run, canceler = this.options().cancel) {
+    this.started = new Date()
+    this.canceler = canceler
     this.running = true
+    if (runner) {
+      runner(this)
+    }
     this.dispatch('started')
   }
 
   cancel () {
+    if (this.canceler) {
+      this.canceling = true
+      this.dispatch('canceling')
+      this.canceler(this)
+      return
+    }
     this.done(130)
   }
 }

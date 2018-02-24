@@ -92,12 +92,15 @@ export default class Mixcloud {
   }
 
   static casts (username) {
+    let total = 0
     const loadCasts = function (url) {
       return client.get(url).then((response) => {
         const casts = response.body
+        total += casts.data.length
         const nextCast = () => {
           const cast = casts.data.shift()
           return Promise.resolve({
+            total,
             cast: cast ? {
               id: cast.slug,
               name: cast.name,

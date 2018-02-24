@@ -1,0 +1,31 @@
+@each $color, $value in $theme-colors {
+  .btn-#{$color}:not(.btn-raised) {
+    border: none;
+    background: transparent;
+    color: $value;
+    &:hover {
+      background: transparentize($value, 0.9);
+    }
+  }
+  .bg-dark .btn-#{$color}:not(.btn-raised) {
+    color: color-yiq($value);
+    &:hover {
+      background: transparentize(color-yiq($value), 0.9);
+    }
+  }
+}
+.btn {
+  display: inline-flex;
+  align-items: baseline;
+  box-shadow: none !important;
+}
+.fa {
+  width: 1.28571429em;
+  text-align: center;
+}
+.btn > .fa {
+  line-height: $line-height-base;
+}
+.btn > .fa + span {
+  margin-left: 6px;
+}

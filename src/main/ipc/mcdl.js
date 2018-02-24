@@ -9,6 +9,8 @@ export default function (ipc) {
     event.returnValue = mcdl
   })
 
+  ipc.sync('mcdl.cancelTasks', (filter) => { mcdl.tasks.select(filter).forEach(task => task.cancel()) })
+
   ipc.async('mcdl.drivers.userInfo', (type, username) => Drivers.get(type).userInfo(username))
 
   ipc.sync('mcdl.savePreset', (id, preset) => mcdl.presets.savePreset(id, preset))
@@ -18,4 +20,5 @@ export default function (ipc) {
   ipc.sync('mcdl.presetLoadUser', p('loadUser'))
   ipc.sync('mcdl.presetLoadCasts', p('loadCasts'))
   ipc.sync('mcdl.presetLoadCastStats', p('loadCastStats'))
+  ipc.sync('mcdl.presetDownloadAll', p('downloadAll'))
 }

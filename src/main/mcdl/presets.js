@@ -5,9 +5,6 @@ import Preset from './preset'
 function setupPreset (mcdl, id, preset) {
   if (preset.dir) {
     preset.dir = preset.dir.replace(/\/+$/, '')
-    if (pathinfo.basename(preset.dir) !== preset.username) {
-      preset.dir += '/' + preset.username
-    }
   } else {
     preset.dir = mcdl.config.home((mcdl.config.isWin ? 'D' : 'd') + 'ownloads' + '/mcdl/' + preset.username)
   }

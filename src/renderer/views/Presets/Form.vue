@@ -4,7 +4,24 @@
         <h3>{{id ? 'Edit ' + (preset && preset.username) : 'Create preset' }}</h3>
         <hr>
         <b-form-group
-            v-for="(el, key) in {username: {label: 'Username', placeholder: 'MixCloud username to download from'}}"
+          label="Provider"
+          :state="states.type"
+          :invalid-feedback="feedbacks.type"
+        >
+            <b-form-select
+              v-if="types.length > 1"
+              :disabled="!!id || saving"
+              required
+              :state="states.type"
+              v-model="values.type"
+              @change="values.username = null"
+            >
+                <option :value="null">Please select the provider</option>
+                <option v-for="type in types" :value="type.name">{{type.title}}</option>
+            </b-form-select>
+        </b-form-group>
+        <b-form-group
+            v-for="(el, key) in {username: {label: 'Username', placeholder: (typeTitle ? typeTitle + ' u' : 'U') + 'sername to download from'}}"
             :key="key"
             :label="el.label"
             :label-for="key"
@@ -15,7 +32,7 @@
                 :id="key"
                 v-model="values[key]"
                 required
-                :disabled="!!id || saving"
+                :disabled="!values.type || !!id || saving"
                 :state="states[key]"
                 :placeholder="el.placeholder"
                 @blur.native="validate(key)"
@@ -30,10 +47,10 @@
         >
             <div class="input-group">
                 <b-form-input
-                    id="username"
+                    id="dir"
                     v-model="values.dir"
                     required
-                    placeholder="MixCloud username to download from"
+                    placeholder="Directory to download to"
                     :state="states.dir"
                     :disabled="saving"
                 ></b-form-input>
@@ -52,8 +69,8 @@
 
         <hr>
         <div class="d-flex justify-content-center flex-wrap-reverse">
-            <b-button @click="$router.replace('/')" variant="secondary" class="mx-2">Cancel</b-button>
-            <b-button type="submit" :disabled="saving" variant="success" class="mx-2">
+            <b-button @click="$router.replace('/')" variant="secondary" class="mx-2 btn-raised">Cancel</b-button>
+            <b-button type="submit" :disabled="saving" variant="success" class="mx-2 btn-raised">
                 <i class="fa fa-circle-o-notch fa-spin" v-if="saving"></i>
                 Sav{{ saving ? 'ing' : 'e'}}
             </b-button>
@@ -65,7 +82,7 @@
   import extend from 'extend'
   const defaults = {
     username: null,
-    type: 'mixcloud',
+    type: null,
     dir: null,
     split: {},
     playlists: {}
@@ -84,19 +101,29 @@
       const presets = this.$root.mcdl.presets
       const preset = presets && this.id ? presets[this.id] : undefined
       const values = extend(true, {}, defaults, preset, {id: this.id || null})
+      const types = this.$root.mcdl.driverTypes
+      if (!values.type && types.length === 1) {
+        values.type = types[0].name
+      }
       return {
         preset,
         values,
+        types,
         states: states(),
         saving: false,
         feedbacks: states(''),
         error: undefined
       }
     },
+    computed: {
+      typeTitle () {
+        return this.values.type ? (this.types.find(t => t.name === this.values.type) || {}).title : ''
+      }
+    },
     methods: {
       validate (k) {
         const promises = []
-        const keys = k ? [k] : ['username', 'dir']
+        const keys = k ? [k] : ['type', 'username', 'dir']
         let valid = keys.reduce((wasValid, key) => {
           if (!this.values[key]) {
             this.states[key] = false

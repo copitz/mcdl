@@ -34,14 +34,28 @@ class Handlers {
   }
 
   presetCastsLoaded (id, casts) {
-    console.log(casts)
     Vue.set(this.mcdl.casts, id, casts)
     IPC.sync('mcdl.presetLoadCastStats', id)
   }
 
   presetCastStatsLoaded (id, stats) {
-    console.log(stats)
     Vue.set(this.mcdl.castStats, id, stats)
+  }
+
+  task (event, task) {
+    const tasks = this.mcdl.tasks
+    const indexOf = tasks.findIndex(t => t.id === task.id)
+    if (task.exitCode === 0 || task.exitCode === 130) {
+      if (indexOf > -1) {
+        tasks.splice(indexOf, 1)
+      }
+    } else {
+      if (indexOf > -1) {
+        tasks.splice(indexOf, 1, task)
+      } else {
+        tasks.push(task)
+      }
+    }
   }
 }
 
@@ -51,6 +65,8 @@ export default class Mcdl {
   users = {}
   casts = {}
   castStats = {}
+
+  driverTypes = [{name: 'mixcloud', title: 'MixCloud'}, {name: 'mock', title: 'MockCloud'}]
 
   constructor () {
     const handlers = new Handlers(this)
@@ -71,5 +87,17 @@ export default class Mcdl {
 
     Vue.set(this, 'tasks', mcdl.tasks)
     handler({}, 'presetsLoaded', mcdl.presets.all)
+  }
+
+  deletePreset (id) {
+    IPC.sync('mcdl.deletePreset', id)
+  }
+
+  cancelTasks (filter) {
+    IPC.sync('mcdl.cancelTasks', filter)
+  }
+
+  presetDownloadAll (id) {
+    IPC.sync('mcdl.presetDownloadAll', id)
   }
 }

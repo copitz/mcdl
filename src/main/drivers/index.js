@@ -1,10 +1,15 @@
 import Mixcloud from './mixcloud'
+import Mock from './mock'
 
 export default class Drivers {
   static get (type) {
-    if (type !== 'mixcloud') {
-      throw new Error('Unknown driver ' + type)
+    switch (type) {
+      case 'mixcloud':
+        return Mixcloud
+      case 'mock':
+        return Mock
     }
-    return Mixcloud
+
+    throw new Error('Unknown driver ' + type)
   }
 }

@@ -2,6 +2,7 @@ import Presets from './presets'
 import Config from './config'
 import EventEmitter from 'events'
 import Ffmpeg from '../util/ffmpeg'
+import _ from 'lodash'
 
 export default class Mcdl {
   tasks = []
@@ -11,6 +12,10 @@ export default class Mcdl {
 
   constructor () {
     const emitter = new EventEmitter()
+
+    this.tasks.select = (filter) => {
+      return _.filter(this.tasks, {labels: filter})
+    }
 
     this.on = (...args) => {
       emitter.on(...args)
