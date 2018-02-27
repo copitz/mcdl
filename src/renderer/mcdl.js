@@ -100,4 +100,8 @@ export default class Mcdl {
   presetDownloadAll (id) {
     IPC.sync('mcdl.presetDownloadAll', id)
   }
+
+  getCastTracks (presetId, castId) {
+    return IPC.sync('mcdl.getCastTracks', presetId, castId)
+  }
 }

@@ -5,6 +5,7 @@ import fs from 'fs'
 import DB from '../util/db'
 import Task from './task'
 import Download from '../util/download'
+import Splitter from '../util/splitter'
 
 export default class Preset {
   stopped = false
@@ -131,6 +132,16 @@ export default class Preset {
     const filePath = path.resolve(this.config.dir, fileName)
     const downloaded = fs.existsSync(filePath) ? fs.statSync(filePath).size : 0
     return {fileName, filePath, downloaded}
+  }
+
+  getCastTracks (id) {
+    const cast = this.db().get('casts.' + id)
+    const details = this.db().get('castDetails.' + id)
+    if (!cast || !details) {
+      console.error('Missing cast or cast details')
+      return
+    }
+    return Splitter.getTracks(this.config, cast, details)
   }
 
   downloadAll () {

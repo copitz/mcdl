@@ -21,4 +21,5 @@ export default function (ipc) {
   ipc.sync('mcdl.presetLoadCasts', p('loadCasts'))
   ipc.sync('mcdl.presetLoadCastStats', p('loadCastStats'))
   ipc.sync('mcdl.presetDownloadAll', p('downloadAll'))
+  ipc.sync('mcdl.getCastTracks', p('getCastTracks'))
 }
