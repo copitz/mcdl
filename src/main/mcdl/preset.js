@@ -6,6 +6,7 @@ import DB from '../util/db'
 import Task from './task'
 import Download from '../util/download'
 import Splitter from '../util/splitter'
+import Brain from '../util/brain'
 
 export default class Preset {
   stopped = false
@@ -31,6 +32,7 @@ export default class Preset {
     }
 
     this.driver = Drivers.get(this.type)
+    this.brain = new Brain()
   }
 
   stop () {
@@ -141,7 +143,19 @@ export default class Preset {
       console.error('Missing cast or cast details')
       return
     }
-    return Splitter.getTracks(this.config, cast, details)
+    const tracks = Splitter.getTracks(this.config, cast, details)
+    tracks.forEach((track, i) => this.brain.addObject(id + '-' + i, track.meta))
+    this.brain.setDecisions(this.db().get('trackDecisions', {}))
+    return tracks
+  }
+
+  setTrackDecision (id, decision) {
+    this.brain.setDecision(id, decision)
+    this.db().set('trackDecisions.' + id, decision)
+  }
+
+  getTrackDecisions () {
+    return Promise.resolve(this.brain.getDecisions())
   }
 
   downloadAll () {

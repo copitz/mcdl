@@ -104,4 +104,12 @@ export default class Mcdl {
   getCastTracks (presetId, castId) {
     return IPC.sync('mcdl.getCastTracks', presetId, castId)
   }
+
+  getTrackDecisions (presetId) {
+    return IPC.async('mcdl.getTrackDecisions', presetId)
+  }
+
+  setTrackDecision (presetId, trackId, decision) {
+    IPC.sync('mcdl.setTrackDecision', presetId, trackId, decision)
+  }
 }

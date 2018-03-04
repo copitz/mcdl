@@ -42,7 +42,7 @@ function getMeta (metaSources, title, artist, username, chapter, cast) {
 
 export default class Splitter {
   static getTracks (options, cast, castDetails) {
-    const meta = options.meta || []
+    const meta = (options.split || {}).meta || []
     const username = options.username
     const castName = cast.name
     const tracks = []
