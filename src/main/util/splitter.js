@@ -42,25 +42,53 @@ function getMeta (metaSources, title, artist, username, chapter, cast) {
 
 export default class Splitter {
   static getTracks (options, cast, castDetails) {
-    const meta = (options.split || {}).meta || []
+    const splitOptions = options.split || {}
+    const chapterOptions = splitOptions.chapters || {}
+    const metaSources = splitOptions.meta || []
     const username = options.username
     const castName = cast.name
     const tracks = []
     let chapter
 
-    castDetails.sections.forEach(function (section) {
-      if (section.chapter) {
-        chapter = section.chapter
+    const last = castDetails.sections.length - 1
+    let chapters = []
+    castDetails.sections.forEach(function (section, i) {
+      const start = section.startSeconds
+      const length = (i === last ? cast.length : castDetails.sections[i + 1].startSeconds) - start
+      const id = cast.name + '-' + i
+      if (section.chapter && (!chapterOptions.exclude || (!tracks.length && chapterOptions.includeFirst))) {
+        chapters.push({start, id, length, title: section.chapter})
       } else if (section.artistName) {
-        if (!tracks.length && section.startSeconds > 0) {
-          tracks.push({
-            start: 0,
-            meta: getMeta(meta, 'Intro', undefined, username, chapter, castName)
+        if (chapters.length) {
+          if (chapters.length > 1 && chapterOptions.merge) {
+            let mergedTitle
+            if (chapterOptions.mergeStrategy === 'join') {
+              mergedTitle = chapters.map(c => c.name).join(', ')
+            } else {
+              mergedTitle = chapters[chapterOptions.mergeStrategy === 'first' ? 0 : chapters.length - 1].title
+            }
+            chapters = [{
+              start: chapters[0].start,
+              id: chapters[chapterOptions.mergeStrategy === 'first' ? 0 : chapters.length - 1].id,
+              length: chapters.reduce((s, c) => s + c.length, 0),
+              title: mergedTitle
+            }]
+          }
+          chapters.forEach(c => {
+            chapter = !tracks.length && chapterOptions.firstChapterFixed ? chapterOptions.firstChapterFixedTitle : c.title
+            tracks.push({
+              ...c,
+              length: section.startSeconds,
+              meta: getMeta(metaSources, chapter, undefined, username, chapter, castName)
+            })
           })
+          chapters = []
         }
         tracks.push({
-          start: section.startSeconds,
-          meta: getMeta(meta, section.songName, section.artistName, username, chapter, castName)
+          id,
+          start,
+          length,
+          meta: getMeta(metaSources, section.songName, section.artistName, username, chapter, castName)
         })
       }
     })

@@ -57,6 +57,10 @@ export default class Brain {
 
     Object.keys(this.decisions).forEach(id => {
       const decisionMeta = this.objects[id]
+      if (!decisionMeta) {
+        delete this.decisions[id]
+        return
+      }
       const decisionArtists = Brain.ARTIST.filter(key => decisionMeta[key]).map(key => decisionMeta[key])
 
       const decision = this.decisions[id] ? 0.9999 : 0.0001

@@ -121,7 +121,6 @@
         Object.keys(this.$root.mcdl.casts[this.id] || {}).forEach(id => {
           const cast = casts[id] = {...this.$root.mcdl.casts[this.id][id]}
           cast.tracks = this.$root.mcdl.getCastTracks(this.id, id)
-          cast.tracks.forEach((track, i) => { track.id = id + '-' + i })
         })
         this.$root.mcdl.getTrackDecisions(this.id).then(decisions => {
           this.trackDecisions = decisions

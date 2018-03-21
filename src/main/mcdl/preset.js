@@ -144,7 +144,7 @@ export default class Preset {
       return
     }
     const tracks = Splitter.getTracks(this.config, cast, details)
-    tracks.forEach((track, i) => this.brain.addObject(id + '-' + i, track.meta))
+    tracks.forEach((track) => this.brain.addObject(track.id, track.meta))
     this.brain.setDecisions(this.db().get('trackDecisions', {}))
     return tracks
   }
