@@ -18,13 +18,16 @@ export default class IPC {
    */
   window
 
+  static main
+
   constructor (window) {
     this.window = window
     modules.forEach(module => module(this))
   }
 
   static start (window) {
-    return new IPC(window)
+    IPC.main = new IPC(window)
+    return IPC.main
   }
 
   on (...args) {

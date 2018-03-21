@@ -1,4 +1,5 @@
 import Client from '../../util/client'
+import IPC from '../../ipc'
 import { BrowserWindow } from 'electron'
 import atob from 'atob'
 import { Cookie } from 'tough-cookie'
@@ -40,36 +41,68 @@ export default class Mixcloud {
     query.id = 'q' + (++id)
     if (cookieSniff === undefined) {
       cookieSniff = new Promise((resolve, reject) => {
-        const sniffWindow = new BrowserWindow({show: false})
-        sniffWindow.loadURL(graphqlClient.options.baseUrl)
-        let resolved = false
-        sniffWindow.webContents.session.cookies.on('changed', e => {
-          sniffWindow.webContents.session.cookies.get({url: 'https://www.mixcloud.com'}, (err, cookies) => {
-            if (err) {
-              reject(err)
-            }
-            const isReady = ['__cfduid', 'csrftoken', 's'].every(
-              name => !!cookies.find(cookie => cookie.name === name)
-            )
-            if (isReady) {
-              const jar = graphqlClient.jar()
-              cookies.forEach(cookie => {
-                jar.setCookie(new Cookie({
-                  key: cookie.name,
-                  expires: cookie.expirationDate ? new Date(cookie.expirationDate * 1000) : 'Infinity',
-                  ...cookie
-                }).toString(), graphqlClient.options.baseUrl)
-              })
-              if (!resolved) {
-                resolved = true
-                resolve()
-                cookieSniff = null
-                console.log(jar.getCookies(graphqlClient.options.baseUrl))
-                setTimeout(() => sniffWindow.destroy(), 5000)
-              }
-            }
-          })
+        const sniffWindow = new BrowserWindow({
+          show: false,
+          webPreferences: {devTools: false},
+          parent: IPC.main.window,
+          modal: true,
+          minimizable: false,
+          closeable: false,
+          maximilable: false,
+          frame: false
         })
+        const contents = sniffWindow.webContents
+        let resolved = false
+        contents.on('did-finish-load', () => {
+          const getLoginStatus = () => {
+            contents.executeJavaScript(`
+            document.querySelector('[data-username]')
+            ? true
+            : (document.querySelector('.user-actions.guest') ? false : null)
+          `).then(res => {
+              console.log(res, resolved)
+              if (res === true) {
+                sniffWindow.hide()
+                contents.session.cookies.get({url: 'https://www.mixcloud.com'}, (err, cookies) => {
+                  if (err) {
+                    reject(err)
+                  }
+                  const jar = graphqlClient.jar()
+                  cookies.forEach(cookie => {
+                    jar.setCookie(new Cookie({
+                      key: cookie.name,
+                      expires: cookie.expirationDate ? new Date(cookie.expirationDate * 1000) : 'Infinity',
+                      ...cookie
+                    }).toString(), graphqlClient.options.baseUrl)
+                  })
+                  if (!resolved) {
+                    resolved = true
+                    resolve()
+                    cookieSniff = null
+                    console.log(jar.getCookies(graphqlClient.options.baseUrl))
+                    setTimeout(() => sniffWindow.destroy(), 5000)
+                  }
+                })
+              } else if (res === false) {
+                contents.executeJavaScript(`
+                  if (!document.querySelector('.auth-modal')) {
+                    document.querySelector('.user-actions.guest > :first-child').click();
+                  }
+                  document.body.style.overflow = 'hidden'
+                  `, true).then(
+                  () => {
+                    sniffWindow.show()
+                    setTimeout(getLoginStatus, 500)
+                  }
+                ).catch(reject)
+              } else {
+                setTimeout(getLoginStatus, 500)
+              }
+            })
+          }
+          getLoginStatus()
+        })
+        sniffWindow.loadURL(graphqlClient.options.baseUrl)
       })
     }
     const graphql = () => graphqlClient.post('graphql', {
