@@ -32,7 +32,7 @@ export default class Presets {
     setupPreset(this.mcdl(), id, preset)
     this.all[id] = preset
     fs.ensureDirSync(pathinfo.dirname(this.path))
-    fs.writeJsonSync(this.path, this.all, {spaces: 2})
+    fs.writeJsonSync(this.path, this.all, { spaces: 2 })
     this.mcdl().dispatch('presetSaved', id, preset)
   }
 
@@ -41,7 +41,7 @@ export default class Presets {
       this.all[id].get().stop()
     }
     delete this.all[id]
-    fs.writeJsonSync(this.path, this.all, {spaces: 2})
+    fs.writeJsonSync(this.path, this.all, { spaces: 2 })
     this.mcdl().dispatch('presetDeleted', id)
   }
 

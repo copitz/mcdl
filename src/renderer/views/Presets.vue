@@ -14,13 +14,13 @@
 </template>
 
 <script>
-  import PresetSummary from '../components/PresetSummary'
+import PresetSummary from '../components/PresetSummary'
 
-  export default {
-    name: 'presets',
-    components: {PresetSummary},
-    computed: {
-      presets () { return this.$root.mcdl.presets }
-    }
+export default {
+  name: 'presets',
+  components: { PresetSummary },
+  computed: {
+    presets () { return this.$root.mcdl.presets }
   }
+}
 </script>

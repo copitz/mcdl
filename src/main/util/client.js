@@ -12,7 +12,7 @@ export default class Client {
   get (...urlOrOptions) {
     const options = extend({}, this.options)
     urlOrOptions.forEach((u) => {
-      extend(true, options, typeof u === 'string' ? {url: u} : u)
+      extend(true, options, typeof u === 'string' ? { url: u } : u)
     })
     if (options.url.match(/^https?:\/\//)) {
       delete options.baseUrl
@@ -43,11 +43,11 @@ export default class Client {
   }
 
   post (...urlOrOptions) {
-    return this.get(...urlOrOptions, {method: 'POST'})
+    return this.get(...urlOrOptions, { method: 'POST' })
   }
 
   head (...urlOrOptions) {
-    return this.get(...urlOrOptions, {method: 'HEAD'})
+    return this.get(...urlOrOptions, { method: 'HEAD' })
   }
 
   jar () {

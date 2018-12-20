@@ -15,17 +15,17 @@
 </template>
 
 <script>
-  import Vue from 'vue'
-  import Tasks from './components/Tasks'
+import Vue from 'vue'
+import Tasks from './components/Tasks'
 
-  Vue.component('tasks', Tasks)
+Vue.component('tasks', Tasks)
 
-  export default {
-    data () {
-      return {
-      }
+export default {
+  data () {
+    return {
     }
   }
+}
 </script>
 
 <style lang="sass">

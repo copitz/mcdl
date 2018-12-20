@@ -3,7 +3,7 @@ import utils from './utils'
 import sanitize from 'sanitize-filename'
 import pathinfo from 'path'
 import config from './config'
-import {spawn} from 'child_process'
+import { spawn } from 'child_process'
 
 function extract (profile, path, target, start, length, meta, callback) {
   const cmd = ['-ss', start, '-i', path]
@@ -92,7 +92,7 @@ const split = {
         meta: options.meta,
         profile: options.profile
       })
-    }, {limit: options.limit})
+    }, { limit: options.limit })
   },
   cast: function (cast, dir, options) {
     const path = dir + '/' + cast.details.src.path

@@ -66,7 +66,7 @@ let id = 0
 export default class Task {
   constructor (mcdl, options = {}) {
     this.id = ++id
-    _.defaults(options, {labels: {}, progress: {}})
+    _.defaults(options, { labels: {}, progress: {} })
     this.labels = options.labels
     this.options = () => options
     this.exitCode = null

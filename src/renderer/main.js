@@ -19,8 +19,8 @@ Vue.config.productionTip = false
 new Vue({
   components: { App },
   router,
-  template: '<App/>',
   data () {
-    return {mcdl: new Mcdl()}
-  }
+    return { mcdl: new Mcdl() }
+  },
+  template: '<App/>'
 }).$mount('#app')

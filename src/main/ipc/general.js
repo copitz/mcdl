@@ -1,4 +1,4 @@
-import {dialog} from 'electron'
+import { dialog } from 'electron'
 import fs from 'fs'
 
 export default function (ipc) {

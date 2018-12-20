@@ -11,7 +11,7 @@ export default class Brain {
   artistDecisions = {}
 
   addObject (id, object) {
-    const meta = {...object}
+    const meta = { ...object }
     Brain.METAS.reverse().forEach(key => {
       const match = /\s+(?:feat(?:\.|uring)\s+(.+)|\((.+)remix\))$/.exec(meta[key] || '')
       if (match) {

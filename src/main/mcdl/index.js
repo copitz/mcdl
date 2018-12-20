@@ -14,7 +14,7 @@ export default class Mcdl {
     const emitter = new EventEmitter()
 
     this.tasks.select = (filter) => {
-      return _.filter(this.tasks, {labels: filter})
+      return _.filter(this.tasks, { labels: filter })
     }
 
     this.on = (...args) => {

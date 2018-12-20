@@ -1,4 +1,5 @@
 import pathinfo from 'path'
+import fs from 'fs'
 import cache from './cache'
 
 export const defaultRequestOptions = {
@@ -98,7 +99,7 @@ const utils = {
     if (!username || typeof username !== 'string') {
       throw new Error('Username must be string')
     }
-    return cache.wrap('userInfo.' + username, () => utils.request(username + '/'), {ttl: 60 * 60 * 12})
+    return cache.wrap('userInfo.' + username, () => utils.request(username + '/'), { ttl: 60 * 60 * 12 })
   }
 }
 

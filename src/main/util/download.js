@@ -1,6 +1,5 @@
 import fs from 'fs-extra'
 import https from 'https'
-import url from 'url'
 import Task from '../mcdl/task'
 
 export default class Download extends Task {
@@ -13,13 +12,12 @@ export default class Download extends Task {
   start () {
     const _req = https.get(this.src)
     super.start(
-      ({done, fail}) => {
-        const requestOptions = url.parse(this.src)
+      ({ done, fail }) => {
         const streamOptions = {}
         let start
         if (fs.existsSync(this.target)) {
           start = fs.statSync(this.target).size
-          requestOptions.headers = {'Range': 'bytes=' + start + '-'}
+          _req.setHeader('Range', 'bytes=' + start + '-')
         }
         _req.on('timeout', fail)
         _req.on('response', (res) => {
@@ -53,7 +51,7 @@ export default class Download extends Task {
         })
         _req.end()
       },
-      ({canceled}) => {
+      ({ canceled }) => {
         _req.abort()
         canceled()
       }

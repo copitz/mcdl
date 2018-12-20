@@ -60,97 +60,97 @@
 </template>
 
 <script>
-  import PresetSummary from '../components/PresetSummary'
+import PresetSummary from '../components/PresetSummary'
 
-  export default {
-    components: {PresetSummary},
-    props: {
-      id: {
-        type: String,
-        required: true
-      }
-    },
-    data () {
-      return {
-        current: null,
-        availableTags: [],
-        selectedTags: [],
-        trackDecisions: null,
-        changedTrackDecisions: 0,
-        selection: {},
-        treshold: 0.5
-      }
-    },
-    watch: {
-      casts: {
-        immediate: true,
-        handler (casts) {
-          const tags = {}
-          if (casts) {
-            Object.values(casts).forEach(cast => {
-              if (cast.tracks) {
-                cast.tracks.forEach(track => {
-                  Object.keys(track.meta).forEach(tag => {
-                    tags[tag] = true
-                  })
+export default {
+  components: { PresetSummary },
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
+  data () {
+    return {
+      current: null,
+      availableTags: [],
+      selectedTags: [],
+      trackDecisions: null,
+      changedTrackDecisions: 0,
+      selection: {},
+      treshold: 0.5
+    }
+  },
+  watch: {
+    casts: {
+      immediate: true,
+      handler (casts) {
+        const tags = {}
+        if (casts) {
+          Object.values(casts).forEach(cast => {
+            if (cast.tracks) {
+              cast.tracks.forEach(track => {
+                Object.keys(track.meta).forEach(tag => {
+                  tags[tag] = true
                 })
-              }
-            })
-          }
-          this.availableTags = Object.keys(tags)
-        }
-      },
-      availableTags: {
-        immediate: true,
-        handler (availableTags) {
-          if (availableTags) {
-            this.selectedTags = this.selectedTags.filter(tag => availableTags.indexOf(tag) > -1)
-            if (!this.selectedTags.length) {
-              this.selectedTags = this.availableTags.slice(0, 3)
+              })
             }
+          })
+        }
+        this.availableTags = Object.keys(tags)
+      }
+    },
+    availableTags: {
+      immediate: true,
+      handler (availableTags) {
+        if (availableTags) {
+          this.selectedTags = this.selectedTags.filter(tag => availableTags.indexOf(tag) > -1)
+          if (!this.selectedTags.length) {
+            this.selectedTags = this.availableTags.slice(0, 3)
           }
         }
-      }
-    },
-    computed: {
-      preset () {
-        return this.$root.mcdl.presets[this.id]
-      },
-      casts () {
-        const casts = {}
-        Object.keys(this.$root.mcdl.casts[this.id] || {}).forEach(id => {
-          const cast = casts[id] = {...this.$root.mcdl.casts[this.id][id]}
-          cast.tracks = this.$root.mcdl.getCastTracks(this.id, id)
-        })
-        this.$root.mcdl.getTrackDecisions(this.id).then(decisions => {
-          this.trackDecisions = decisions
-        })
-        return casts
-      },
-      orderedCasts () {
-        const answer = Object.values(this.casts)
-        answer.sort((a, b) => new Date(b.created) - new Date(a.created))
-        return answer
-      }
-    },
-    methods: {
-      toggleTrackDecision (track) {
-        let current = this.trackDecisions[track.id]
-        if (typeof current === 'number') {
-          current = current >= this.treshold
-        } else if (current !== false) {
-          current = true
-        }
-        this.changedTrackDecisions++
-        this.$set(this.trackDecisions, track.id, !current)
-        this.$root.mcdl.setTrackDecision(this.id, track.id, !current)
-      },
-      commitTrackDecisions () {
-        this.changedTrackDecisions = 0
-        this.$root.mcdl.getTrackDecisions(this.id).then(decisions => {
-          this.trackDecisions = decisions
-        })
       }
     }
+  },
+  computed: {
+    preset () {
+      return this.$root.mcdl.presets[this.id]
+    },
+    casts () {
+      const casts = {}
+      Object.keys(this.$root.mcdl.casts[this.id] || {}).forEach(id => {
+        const cast = casts[id] = { ...this.$root.mcdl.casts[this.id][id] }
+        cast.tracks = this.$root.mcdl.getCastTracks(this.id, id)
+      })
+      this.$root.mcdl.getTrackDecisions(this.id).then(decisions => {
+        this.trackDecisions = decisions
+      })
+      return casts
+    },
+    orderedCasts () {
+      const answer = Object.values(this.casts)
+      answer.sort((a, b) => new Date(b.created) - new Date(a.created))
+      return answer
+    }
+  },
+  methods: {
+    toggleTrackDecision (track) {
+      let current = this.trackDecisions[track.id]
+      if (typeof current === 'number') {
+        current = current >= this.treshold
+      } else if (current !== false) {
+        current = true
+      }
+      this.changedTrackDecisions++
+      this.$set(this.trackDecisions, track.id, !current)
+      this.$root.mcdl.setTrackDecision(this.id, track.id, !current)
+    },
+    commitTrackDecisions () {
+      this.changedTrackDecisions = 0
+      this.$root.mcdl.getTrackDecisions(this.id).then(decisions => {
+        this.trackDecisions = decisions
+      })
+    }
   }
+}
 </script>

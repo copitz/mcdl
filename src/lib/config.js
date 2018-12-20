@@ -24,11 +24,11 @@ const config = {
   savePreset (id, preset) {
     config.presets[id] = preset
     fs.ensureDirSync(pathinfo.dirname(presetsPath))
-    fs.writeJsonSync(presetsPath, config.presets, {spaces: 2})
+    fs.writeJsonSync(presetsPath, config.presets, { spaces: 2 })
   },
   deletePreset (id) {
     delete config.presets[id]
-    fs.writeJsonSync(presetsPath, config.presets, {spaces: 2})
+    fs.writeJsonSync(presetsPath, config.presets, { spaces: 2 })
   },
   reload () {
     if (!fs.existsSync(presetsPath)) {

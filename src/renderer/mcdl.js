@@ -66,7 +66,7 @@ export default class Mcdl {
   casts = {}
   castStats = {}
 
-  driverTypes = [{name: 'mixcloud', title: 'MixCloud'}, {name: 'mock', title: 'MockCloud'}]
+  driverTypes = [{ name: 'mixcloud', title: 'MixCloud' }, { name: 'mock', title: 'MockCloud' }]
 
   constructor () {
     const handlers = new Handlers(this)

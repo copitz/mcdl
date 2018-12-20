@@ -1,4 +1,4 @@
-import {ipcRenderer} from 'electron'
+import { ipcRenderer } from 'electron'
 
 let lastMessageId = 0
 

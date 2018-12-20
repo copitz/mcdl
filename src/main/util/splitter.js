@@ -24,7 +24,11 @@ function getMeta (metaSources, title, artist, username, chapter, cast) {
       value = metaSource.value
     } else if (metaSource.field && fields.hasOwnProperty(metaSource.field) && fields[metaSource.field]) {
       if (metaSource.pattern) {
-        const matches = fields[metaSource.field].match(new RegExp(metaSource.pattern))
+        const matches = fields[metaSource.field].match(new RegExp(metaSource.pattern, metaSource.flags))
+        if (matches.groups) {
+          Object.assign(meta, matches.groups)
+          return
+        }
         if (matches) {
           value = matches[1] || matches[0]
         }
@@ -44,7 +48,7 @@ export default class Splitter {
   static getTracks (options, cast, castDetails) {
     const splitOptions = options.split || {}
     const chapterOptions = splitOptions.chapters || {}
-    const metaSources = splitOptions.meta || []
+    const metaSources = options.meta || []
     const username = options.username
     const castName = cast.name
     const tracks = []
@@ -57,7 +61,7 @@ export default class Splitter {
       const length = (i === last ? cast.length : castDetails.sections[i + 1].startSeconds) - start
       const id = cast.name + '-' + i
       if (section.chapter && (!chapterOptions.exclude || (!tracks.length && chapterOptions.includeFirst))) {
-        chapters.push({start, id, length, title: section.chapter})
+        chapters.push({ start, id, length, title: section.chapter })
       } else if (section.artistName) {
         if (chapters.length) {
           if (chapters.length > 1 && chapterOptions.merge) {

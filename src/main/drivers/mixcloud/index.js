@@ -4,8 +4,8 @@ import { BrowserWindow } from 'electron'
 import atob from 'atob'
 import { Cookie } from 'tough-cookie'
 
-const client = new Client({baseUrl: 'https://api.mixcloud.com/', json: true})
-const graphqlClient = new Client({baseUrl: 'https://www.mixcloud.com/', json: true, jar: true, retry: 3})
+const client = new Client({ baseUrl: 'https://api.mixcloud.com/', json: true })
+const graphqlClient = new Client({ baseUrl: 'https://www.mixcloud.com/', json: true, jar: true, retry: 3 })
 
 const userInfos = {}
 
@@ -43,7 +43,7 @@ export default class Mixcloud {
       cookieSniff = new Promise((resolve, reject) => {
         const sniffWindow = new BrowserWindow({
           show: false,
-          webPreferences: {devTools: false},
+          webPreferences: { devTools: false },
           parent: IPC.main.window,
           modal: true,
           minimizable: false,
@@ -63,7 +63,7 @@ export default class Mixcloud {
               console.log(res, resolved)
               if (res === true) {
                 sniffWindow.hide()
-                contents.session.cookies.get({url: 'https://www.mixcloud.com'}, (err, cookies) => {
+                contents.session.cookies.get({ url: 'https://www.mixcloud.com' }, (err, cookies) => {
                   if (err) {
                     reject(err)
                   }

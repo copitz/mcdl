@@ -17,13 +17,21 @@ export default class Preset {
     this.type = config.type || 'mixcloud'
     this.mcdl = mcdl
 
-    let db
+    let db = new DB(path.resolve(config.dir, 'mcdl.json'))
     this.db = () => {
-      if (!db) {
-        db = new DB(path.resolve(config.dir, 'mcdl.json'))
-      }
       return db
     }
+    this.settings = Object.assign({
+      downloadedDir: './downloaded',
+      meta: [
+        {
+          field: 'title',
+          pattern: /^(?<title>.+?)(\((?<album_artist>[^)]+)\s+(remix|mix|edit)\))?( - (?<album>.+))?$/,
+          flags: 'i'
+        }
+      ]
+    }, db.get('config') || {})
+    // bla
 
     this.dispatch = (topic, ...args) => {
       if (!this.stopped) {
@@ -36,7 +44,7 @@ export default class Preset {
   }
 
   stop () {
-    this.mcdl.tasks.select({presetId: this.id}).forEach(task => task.cancel())
+    this.mcdl.tasks.select({ presetId: this.id }).forEach(task => task.cancel())
     this.stopped = true
   }
 
@@ -51,8 +59,8 @@ export default class Preset {
   loadCasts () {
     let cancel
     new Task(this.mcdl, {
-      labels: {presetId: this.id, topic: 'loading'},
-      run: ({id: fooId, progress, done, fail}) => {
+      labels: { presetId: this.id, topic: 'loading' },
+      run: ({ id: fooId, progress, done, fail }) => {
         const casts = this.db().get('casts', {})
         const next = (res) => {
           if (cancel) {
@@ -75,15 +83,15 @@ export default class Preset {
           .then(next)
           .catch(fail)
       },
-      cancel: ({canceled}) => { cancel = canceled }
+      cancel: ({ canceled }) => { cancel = canceled }
     }).start()
   }
 
   loadCastStats () {
     let cancel
     new Task(this.mcdl, {
-      labels: {presetId: this.id, topic: 'loading'},
-      run: ({progress, done}) => {
+      labels: { presetId: this.id, topic: 'loading' },
+      run: ({ progress, done }) => {
         const stats = {}
         const casts = this.db().get('casts', {})
         const castIds = Object.keys(casts)
@@ -117,7 +125,7 @@ export default class Preset {
         }
         next()
       },
-      cancel: ({canceled}) => { cancel = canceled }
+      cancel: ({ canceled }) => { cancel = canceled }
     }).start()
   }
 
@@ -131,9 +139,9 @@ export default class Preset {
 
   getCastDownloadInfo (id, cast, details) {
     const fileName = cast.created.substr(0, 10) + '-' + id + '.' + mime.getExtension(details.src.contentType)
-    const filePath = path.resolve(this.config.dir, fileName)
+    const filePath = path.resolve(this.config.dir, this.settings.downloadedDir, fileName)
     const downloaded = fs.existsSync(filePath) ? fs.statSync(filePath).size : 0
-    return {fileName, filePath, downloaded}
+    return { fileName, filePath, downloaded }
   }
 
   getCastTracks (id) {
@@ -143,7 +151,9 @@ export default class Preset {
       console.error('Missing cast or cast details')
       return
     }
-    const tracks = Splitter.getTracks(this.config, cast, details)
+    const tracks = Splitter.getTracks(
+      { username: this.config.username, meta: this.settings.meta }, cast, details
+    )
     tracks.forEach((track) => this.brain.addObject(track.id, track.meta))
     this.brain.setDecisions(this.db().get('trackDecisions', {}))
     return tracks
@@ -179,11 +189,11 @@ export default class Preset {
       const downloadInfo = this.getCastDownloadInfo(id, casts[id], details)
       const current = downloadInfo.downloaded
       const total = details.src.contentLength
-      stats[id] = {total, downloaded: current}
+      stats[id] = { total, downloaded: current }
       if (current < total) {
         tasks.push(new Downloader(details.src.url, downloadInfo.filePath, this.mcdl, {
-          labels: {presetId: this.id, castId: id, topic: 'downloading'},
-          progress: {total, current},
+          labels: { presetId: this.id, castId: id, topic: 'downloading' },
+          progress: { total, current },
           done: (task) => {
             if (!task.exitCode) {
               next()

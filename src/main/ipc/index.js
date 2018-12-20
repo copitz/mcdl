@@ -1,4 +1,4 @@
-import {ipcMain} from 'electron'
+import { ipcMain } from 'electron'
 
 const modules = [
   require('./general').default,

@@ -27,7 +27,7 @@ class MockDownload extends Task {
     const maximum = 10
     let current = 0
     super.start(
-      ({progress, done}) => {
+      ({ progress, done }) => {
         console.log(`Download ${this.id} started`)
         this.interval = setInterval(() => {
           current++
@@ -40,7 +40,7 @@ class MockDownload extends Task {
           }
         }, 1000)
       },
-      ({canceled}) => {
+      ({ canceled }) => {
         console.log(`Download ${this.id} canceled`)
         clearInterval(this.interval)
         canceled()
